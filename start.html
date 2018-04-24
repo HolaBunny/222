@@ -1,0 +1,346 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>占卜</title>
+    <script type="text/javascript">
+//---- 加载 XML 文档的函数 ----
+function getxmlDoc(xmlFile){
+    var xmlDoc;
+    try{
+        //Internet Explorer 可以使用其原生方法加载 XML
+        xmlDoc=new ActiveXObject("Microsoft.XMLDOM");
+    }catch(e){
+        try{
+            //Firefox 也有标准方法,但可能造成其他浏览器报错,故省略
+            //使用 XMLHttpRequest 替代,适用于大部分浏览器
+            var xmlHttp=new XMLHttpRequest() ;
+            xmlHttp.open("GET",xmlFile,false) ;
+            xmlHttp.send(null) ;
+            return xmlHttp.responseXML;
+        }catch(e){
+            return null;
+        }
+    }
+ xmlDoc.async=false;
+    xmlDoc.load(xmlFile);
+    return xmlDoc;
+}       //全局变量
+        var xmlV = getxmlDoc("爻辞.xml");//读入xml彖辞
+        var domElemsVL = xmlV.getElementsByTagName("爻位");
+        var domElemsVN = xmlV.getElementsByTagName("卦名");
+        var domElemsVV = xmlV.getElementsByTagName("爻辞");
+        var xmlV = getxmlDoc("卦名.xml");//读入xml卦名
+        var domElemsNV = xmlV.getElementsByTagName("彖辞");
+        var domElemsNN = xmlV.getElementsByTagName("卦名");
+        var domElemsNP = xmlV.getElementsByTagName("卦形");
+        var flag = 0;
+        var flagj = 0;//记录奇的次数
+        var Aflag = 0;//记录三次一变以后当前输入行数
+        var j = 0;
+        var i = 0;
+        var arr = new Array(6);//申明一维数组
+        for(i = 0;i<arr.length;i++){
+            arr[i] = new Array(3);//申明二维数组
+        }
+        for(i = 0;i<6;i++){
+            switch(i){
+                case 0:
+                    j = "1";
+                    break;
+                case 1:
+                    j = "2";
+                    break;
+                case 2:
+                    j = "3";
+                    break;
+                case 3:
+                    j = "4";
+                    break;
+                case 4:
+                    j = "5";
+                    break;
+                case 5:
+                    j = "6";
+                    break;
+            }
+            arr[i][0] = "r" + j +"d1";
+            arr[i][1] = "r" + j +"d2";
+            arr[i][2] = "r" + j +"d3";
+        }
+        var amount = 0;
+        function checkRight(id) {
+            amount = amount + 1;
+            if (amount >18){
+                alert("已完成输入");
+                return;
+            }
+            else {
+                document.getElementById("times").value = "总次数：18 当前输入次数 ：" + amount + "剩余输入次数：" + (18 - amount);
+                flag = flag + 1;
+
+            if (document.getElementById(id).innerHTML == 1 || document.getElementById(id).innerHTML == 2){
+                flagj = flagj + 1;
+            }
+            else if (document.getElementById(id).innerHTML == 3 && flag == 1){
+                flagj = flagj + 1;
+            }
+            if (flag == 3){
+                if (flagj == 3){
+                    document.getElementById(arr[Aflag][0]).innerHTML = 9;
+                    document.getElementById(arr[Aflag][1]).innerHTML = "1";
+                    document.getElementById(arr[Aflag][2]).innerHTML = "0";
+                }
+                else if (flagj == 2){
+                    document.getElementById(arr[Aflag][0]).innerHTML = 8;
+                    document.getElementById(arr[Aflag][1]).innerHTML = "0";
+                    document.getElementById(arr[Aflag][2]).innerHTML = "0";
+                }
+                else if (flagj == 1){
+                    document.getElementById(arr[Aflag][0]).innerHTML = 7;
+                    document.getElementById(arr[Aflag][1]).innerHTML = "1";
+                    document.getElementById(arr[Aflag][2]).innerHTML = "1";
+                }
+                else{
+                    document.getElementById(arr[Aflag][0]).innerHTML = 6;
+                    document.getElementById(arr[Aflag][1]).innerHTML = "0";
+                    document.getElementById(arr[Aflag][2]).innerHTML = "1";
+                }
+                Aflag = Aflag + 1;
+                flag = 0;
+                flagj = 0;
+            }
+if(amount==18)
+Getsult();
+            }
+        }
+        //将本卦或者之卦卦象转换成6个字符串
+        function Pattern(F){
+            var pattern = "";
+            var n = 0;
+            for (n = 0; n < 6; n++){
+                pattern = pattern + document.getElementById(arr[n][F]).innerHTML;
+            }
+            return pattern;
+        }
+       function Change0_6(N) {
+            var n = 0;
+            for (n = 0; n < domElemsNP.length; n++) {
+                if (domElemsNP[n].childNodes[0].data == N) {
+                    document.getElementById("divi").value = domElemsNN[2*n+1].childNodes[0].data ;//输出卦名
+                    document.getElementById("main").value = domElemsNV[n].childNodes[0].data ;//输出主卦辞
+                    break;
+                }
+            }
+        }
+    function Change1_5(N,P){
+            var n = 0;
+            var m = 0;
+            for(n = 0;n < domElemsNP.length;n++){
+                if(domElemsNP[n].childNodes[0].data ==N ){
+                    for(m = 0;m < domElemsVN.length;m++){
+                        if(domElemsNN[2*n+1].childNodes[0].data == domElemsVN[m].childNodes[0].data&&domElemsVL[m].childNodes[0].data == P){
+                            document.getElementById("divi").value = domElemsVN[m].childNodes[0].data;//输出卦名
+                            document.getElementById("main").value = domElemsVV[2*m+1].childNodes[0].data;//输出主爻辞
+                        }
+                    }
+                }
+            }
+        }
+function Change2_4(N,P,Q){
+            var n = 0;
+            var m = 0;
+            for(n = 0;n < domElemsNP.length;n++){
+                if(domElemsNP[n].childNodes[0].data == N){
+                    for(m = 0;m < domElemsVN.length;m++){
+                        if(domElemsNN[2*n+1].childNodes[0].data == domElemsVN[m].childNodes[0].data&&domElemsVL[m].childNodes[0].data == P){
+                            document.getElementById("divi").value = domElemsVN[m].childNodes[0].data;//输出卦名
+                            document.getElementById("main").value = domElemsVV[2*m+1].childNodes[0].data;//输出主爻辞
+                        }
+                        else if(domElemsNN[2*n+1].childNodes[0].data == domElemsVN[m].childNodes[0].data&&domElemsVL[m].childNodes[0].data == Q){
+                            document.getElementById("excess").value = domElemsVV[2*m+1].childNodes[0].data;//输出副爻辞
+                        }
+                    }
+                }
+            }
+        }
+function Change3(N,M){
+            var n = 0;
+            for(n = 0;n < domElemsNP.length;n++){
+                if(domElemsNP[n].childNodes[0].data == N){
+                    document.getElementById("divi").value = domElemsNN[2*n+1].childNodes[0].data+"(本)"+document.getElementById("divi").value;//输出卦名
+                    document.getElementById("main").value = domElemsNV[n].childNodes[0].data;//输出主卦辞
+                }
+                else if(domElemsNP[n].childNodes[0].data == M){
+                    document.getElementById("divi").value = document.getElementById("divi").value+domElemsNN[2*n+1].childNodes[0].data+"(之)";//输出卦名
+                    document.getElementById("excess").value = domElemsNV[n].childNodes[0].data;//输出副卦辞
+                }
+            }
+        }
+        //获取结果
+ function Getsult(){
+            var number = new Array(6);
+            var patter1 = "";
+            var patter2 = "";
+            var Cflag = 0;//记录变数
+            var ByaoL = new Array();
+            var ZyaoL = new Array();
+            var sum = 0;
+            var z = 0;
+            var n = 0;
+            for(n = 0;n < 6;n++){
+                number[n] = document.getElementById(arr[n][0]).innerHTML;
+                if(number[n] == 6||number[n] == 9){
+                    ByaoL[Cflag]= 6 - n;
+                    Cflag = Cflag + 1;
+                }
+                else{
+                    ZyaoL[z] = 6 - n;
+                    z++;
+                }
+            }
+            switch(Cflag){
+                case 0:
+                    
+                    patter1 = Pattern(1);
+                    Change0_6(patter1);
+                    break;
+                case 1:
+                  
+                    patter1 = Pattern(1);
+                    Change1_5(patter1,ByaoL[0]);
+                    break;
+                    case 2:
+                  
+                    patter1 = Pattern(1);
+                    Change2_4(patter1,ByaoL[0],ByaoL[1]);
+                    break;
+                case 3:
+                     
+                    patter1 = Pattern(1);
+                    patter2 = Pattern(2);
+                    Change3(patter1,patter2);
+                    break;
+                case 4:
+                 
+	patter2 = Pattern(2);
+                    Change2_4(patter2,ZyaoL[1],ZyaoL[0]);
+                    break;
+                case 5:
+	    
+                    patter2 = Pattern(2);
+                    Change1_5(patter2,ZyaoL[0]);
+                    break;
+               case 6:
+	   
+                    patter1 = parseInt(Pattern(1));
+                    patter2 = parseInt(Pattern(2));
+                    if(patter1 == "111111"){
+                        document.getElementById("divi").value = "乾卦";
+                        document.getElementById("main").value = "用九：见群龙无首，吉。";
+                        document.getElementById("excess").value = "元，亨，利，贞。";
+                    }
+                    else if(patter2 == "111111"){
+                        document.getElementById("divi").value = "坤卦";
+                        document.getElementById("main").value = "用六：利永贞。";
+                        document.getElementById("excess").value = "元，亨，利牝马之贞。君子有攸往，先迷；后得主，利。西南得朋，东北丧朋。安贞吉。";
+                    }
+                    else
+                        Change0_6(patter2);
+                    break;
+            }
+        }
+    </script>
+</head>
+<body style="text-align:center;background-repeat:no-repeat; background-size:100% 100%; background-attachment:fixed;" background="timg.jpg">
+    <link rel="stylesheet" type="text/css" href="bootstrap.min.css" />
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="index.html">简介</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a class="nav-item nav-link active" href="start.html">开始占卜 <span class="sr-only">(current)</span></a>
+                <a class="nav-item nav-link" href="base.html">使用方法</a>
+                <a class="nav-item nav-link" href="about.html">关于</a>
+                <a class="nav-item nav-link disabled" href="#">...</a>
+            </div>
+        </div>
+    </nav>
+    <div>
+        <div>
+            <h2>请选择左手揲余的蓍草数量（共十八次）</h2>
+        </div>
+        <button id="demo1" onclick="checkRight('demo1')" type="button" class="btn btn-outline-primary btn-lg" style="font-weight:bold;style="font-weight:bold">1</button>
+        <button id="demo2" onclick="checkRight('demo2')" type="button" class="btn btn-outline-primary btn-lg" style="font-weight:bold">2</button>
+        <button id="demo3" onclick="checkRight('demo3')" type="button" class="btn btn-outline-primary btn-lg" style="font-weight:bold">3</button>
+        <button id="demo4" onclick="checkRight('demo4')" type="button" class="btn btn-outline-primary btn-lg" style="font-weight:bold">4</button><br />
+        <br />
+
+    </div>
+    <div>
+        <table width="400" height="300" border="8" align="center">
+            <tr>
+                <td style="font-weight:bold">当前爻象</td>
+                <td style="font-weight:bold">本卦卦象</td>
+                <td style="font-weight:bold">之卦卦象</td>
+            </tr>
+            <tr>
+                <td id="r1d1"></td>
+                <td id="r1d2"></td>
+                <td id="r1d3"></td>
+            </tr>
+            <tr>
+                <td id="r2d1"></td>
+                <td id="r2d2"></td>
+                <td id="r2d3"></td>
+            </tr>
+            <tr>
+                <td id="r3d1"></td>
+                <td id="r3d2"></td>
+                <td id="r3d3"></td>
+            </tr>
+            <tr>
+                <td id="r4d1"></td>
+                <td id="r4d2"></td>
+                <td id="r4d3"></td>
+            </tr>
+            <tr>
+                <td id="r5d1"></td>
+                <td id="r5d2"></td>
+                <td id="r5d3"></td>
+            </tr>
+            <tr>
+                <td id="r6d1"></td>
+                <td id="r6d2"></td>
+                <td id="r6d3"></td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="form-group">
+        <label for="变数">变数</label>
+        <input id="times" type="text" readonly class="form-control" placeholder="0" style="border:0px;background:rgba(0, 0, 0, 0.1);text-align:center">
+    </div>
+    <h3>（三变成一爻，十八变成一卦）</h3>
+    <form>
+        <div class="form-group">
+            <label for="卦名">卦名</label>
+            <input id="divi" type="text" readonly class="form-control" placeholder="待生成" style="border:0px;background:rgba(0, 0, 0, 0.1);text-align:center">
+        </div>
+        <div class="form-group">
+            <label for="主卦辞">主卦（爻）辞：</label>
+            <input id="main" type="text" readonly class="form-control" placeholder="待生成" style="border:0px;background:rgba(0, 0, 0, 0.1);text-align:center">
+        </div>
+        <div class="form-group">
+            <label for="副卦辞">副卦（爻）辞：</label>
+            <input id="excess" type="text" readonly class="form-control" placeholder="待生成" style="border:0px;background:rgba(0, 0, 0, 0.1);text-align:center">
+        </div>
+        <button type="reset" class="btn btn-primary" onclick="window.location.reload()">重置</button>
+    </form><br />
+    <small><a href="base.html"><b>进一步了解 > </b></a></small>
+</body>
+</html>
